@@ -4,6 +4,7 @@ import { useHistory } from "react-router-dom";
 
 // styles
 import "./Create.css";
+import { useTheme } from "../../hooks/useTheme";
 
 export default function Create() {
     const [title, setTitle] = useState("");
@@ -11,37 +12,46 @@ export default function Create() {
     const [cookingTime, setCookingTime] = useState("");
     const [newIngredient, setNewIngredient] = useState("");
     const [ingredients, setIngredients] = useState([]);
-	const ingredientInput = useRef(null);
-	const history = useHistory();
+    const ingredientInput = useRef(null);
+    const history = useHistory();
+    const { mode } = useTheme();
 
-	const { postData, data, error } = useFetch("http://localhost:3000/recipes", "POST");
+    const { postData, data } = useFetch(
+        "http://localhost:3000/recipes",
+        "POST"
+    );
 
     const handleSubmit = (e) => {
         e.preventDefault();
-		postData({title, ingredients, method, cookingTime: cookingTime + ' minutes', });
+        postData({
+            title,
+            ingredients,
+            method,
+            cookingTime: cookingTime + " minutes",
+        });
     };
 
-	const handleAdd = (e) => {
-		e.preventDefault();
-		const ing = newIngredient.trim();
+    const handleAdd = (e) => {
+        e.preventDefault();
+        const ing = newIngredient.trim();
 
-		if (ing && !ingredients.includes(ing)) {
-			setIngredients((prevIngredients) => [...prevIngredients, ing]);
-		}
+        if (ing && !ingredients.includes(ing)) {
+            setIngredients((prevIngredients) => [...prevIngredients, ing]);
+        }
 
-		setNewIngredient("");
-		ingredientInput.current.focus();
-	}
+        setNewIngredient("");
+        ingredientInput.current.focus();
+    };
 
-	// redirect the user when we get data response
-	useEffect(() => {
-		if (data) {
-			history.push("/");
-		}
-	}, [data, history]);
+    // redirect the user when we get data response
+    useEffect(() => {
+        if (data) {
+            history.push("/");
+        }
+    }, [data, history]);
 
     return (
-        <div className="create">
+        <div className={`create ${mode}`}>
             <h2 className="page-title">Add A New Recipe</h2>
             <form onSubmit={handleSubmit}>
                 <label>
@@ -61,14 +71,19 @@ export default function Create() {
                             type="text"
                             onChange={(e) => setNewIngredient(e.target.value)}
                             value={newIngredient}
-							ref={ingredientInput}
+                            ref={ingredientInput}
                         />
                         <button className="btn" onClick={handleAdd}>
                             Add
                         </button>
                     </div>
                 </label>
-				<p>Current ingredients: {ingredients.map(ing => <em key={ing}>{ing}, </em>)}</p>
+                <p>
+                    Current ingredients:{" "}
+                    {ingredients.map((ing) => (
+                        <em key={ing}>{ing}, </em>
+                    ))}
+                </p>
 
                 <label>
                     <span>Recipe method:</span>
