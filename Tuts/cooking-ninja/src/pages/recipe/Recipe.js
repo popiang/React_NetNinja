@@ -17,12 +17,11 @@ export default function Recipe() {
     useEffect(() => {
         setIsPending(true);
 
-        projectFirestore
+        const unsub = projectFirestore
             .collection("recipes")
             .doc(id)
-            .get()
-            .then((doc) => {
-				console.log(doc);
+            .onSnapshot((doc) => {
+                console.log(doc);
                 if (doc.exists) {
                     setIsPending(false);
                     setRecipe(doc.data());
@@ -30,8 +29,39 @@ export default function Recipe() {
                     setIsPending(false);
                     setError("Could not find that recepi!");
                 }
-            });
+            }, (err) => {
+				setError(err.message);
+				setIsPending(false);
+			});
+
+		return () => unsub();
+
     }, [id]);
+
+    // useEffect(() => {
+    //     setIsPending(true);
+
+    //     projectFirestore
+    //         .collection("recipes")
+    //         .doc(id)
+    //         .get()
+    //         .then((doc) => {
+	// 			console.log(doc);
+    //             if (doc.exists) {
+    //                 setIsPending(false);
+    //                 setRecipe(doc.data());
+    //             } else {
+    //                 setIsPending(false);
+    //                 setError("Could not find that recepi!");
+    //             }
+    //         });
+    // }, [id]);
+
+	const handleClick = () => {
+		projectFirestore.collection('recipes').doc(id).update({
+			title: 'Something completely different'
+		});
+	};
 
     return (
         <div className={`recipe ${mode}`}>
@@ -47,6 +77,7 @@ export default function Recipe() {
                         ))}
                     </ul>
                     <p className="method">{recipe.method}</p>
+					<button onClick={handleClick}>Update me</button>
                 </>
             )}
         </div>

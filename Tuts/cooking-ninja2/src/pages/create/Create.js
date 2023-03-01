@@ -1,6 +1,7 @@
-import { useEffect, useState, useRef } from "react";
-import { useFetch } from "../../hooks/useFetch";
+import { useState, useRef } from "react";
+// import { useFetch } from "../../hooks/useFetch";
 import { useHistory } from "react-router-dom";
+import { projectFirestore } from "../../firebase/config";
 
 // styles
 import "./Create.css";
@@ -13,22 +14,29 @@ export default function Create() {
     const [newIngredient, setNewIngredient] = useState("");
     const [ingredients, setIngredients] = useState([]);
     const history = useHistory();
-	const ingredientInput = useRef(null);
-	const { mode } = useTheme();
+    const ingredientInput = useRef(null);
+    const { mode } = useTheme();
 
-    const { postData, data } = useFetch(
-        "http://localhost:3000/recipes",
-        "POST"
-    );
+    // const { postData, data } = useFetch(
+    //     "http://localhost:3000/recipes",
+    //     "POST"
+    // );
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        postData({
+        const doc = {
             title,
             ingredients,
             method,
             cookingTime: cookingTime + " minutes",
-        });
+        };
+
+        try {
+            await projectFirestore.collection("recipes").add(doc);
+            history.push("/");
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     const handleAdd = (e) => {
@@ -40,14 +48,14 @@ export default function Create() {
         }
 
         setNewIngredient("");
-		ingredientInput.current.focus();
+        ingredientInput.current.focus();
     };
 
-    useEffect(() => {
-        if (data) {
-            history.push("/");
-        }
-    }, [data, history]);
+    // useEffect(() => {
+    //     if (data) {
+    //         history.push("/");
+    //     }
+    // }, [data, history]);
 
     return (
         <div className={`create ${mode}`}>
@@ -70,7 +78,7 @@ export default function Create() {
                             type="text"
                             onChange={(e) => setNewIngredient(e.target.value)}
                             value={newIngredient}
-							ref={ingredientInput}
+                            ref={ingredientInput}
                         />
                         <button className="btn" onClick={handleAdd}>
                             Add
